@@ -1,0 +1,11 @@
+---
+- name: Playbook 
+  hosts: localhost
+  connection: local
+  user: ec2-user
+  become: yes
+  become_method: enable
+  vars_files:
+    - "group_vars/main.yml"
+  roles:
+    - { role: IaaS }

@@ -1,0 +1,166 @@
+---
+- name: Criando Launch Configuration
+  ec2_lc:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    name: "lc-{{ application }}"
+    image_id: "{{ image }}"
+    key_name: "{{ key_name }}"
+    region: "{{ region }}"
+    security_groups: "{{ security_groups }}"
+    instance_type: "{{ instance_type }}"
+    user_data_path: "{{ user_data }}"
+    volumes:
+    - device_name: "{{ device_name }}"
+      volume_size: "{{ volume_size }}"
+
+- name: Provisionando ASG
+  ec2_asg:
+    name: "asg-{{ application }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    aws_access_key: "{{ aws_access_key }}"
+    region: "{{ region }}"
+    launch_config_name: "lc-{{ application }}"
+    health_check_period: 300
+    health_check_type: ELB
+    min_size: "{{ min_size }}"
+    max_size: "{{ max_size }}"
+    desired_capacity: "{{ desired_capacity }}"
+    vpc_zone_identifier: [ 'subnet-81ac54ea','subnet-8d5ec0c1']
+    
+- name: Criando Politica de SCALE DOWN
+  ec2_scaling_policy:
+    aws_secret_key: "{{ aws_secret_key }}"
+    aws_access_key: "{{ aws_access_key }}"
+    state: present
+    region: "{{ region }}"
+    name: scale-down-policy
+    adjustment_type: ChangeInCapacity
+    asg_name: "asg-{{ application }}"
+    scaling_adjustment: -1
+    min_adjustment_step: -1
+    cooldown: 300
+  register: scale_down_policy
+  tags: scaling_policy
+
+- name: Criando Politica de SCALE UP
+  ec2_scaling_policy:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    state: present
+    region: "{{ region }}"
+    name: scale-up-policy
+    adjustment_type: ChangeInCapacity
+    asg_name: "asg-{{ application }}"
+    scaling_adjustment: 1
+    min_adjustment_step: 1
+    cooldown: 300
+  register: scale_up_policy
+  tags: scaling_policy
+
+- name: Criando Alarme de SCALE DOWN
+  ec2_metric_alarm:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    state: present
+    region: "{{ region }}"
+    name: "cpu-low"
+    metric: CPUUtilization
+    namespace: "AWS/EC2"
+    statistic: Average
+    comparison: "<="
+    threshold: 5.0
+    period: 300
+    evaluation_periods: 3
+    unit: "Percent"
+    description: "Será acionado quando a média de uso da CPU for inferior a 5% por 15 minutos"
+    dimensions:
+      AutoScalingGroupName: "asg-{{ application }}"
+    alarm_actions:
+    - "{{ scale_down_policy.arn }}"
+  tags: alarm
+
+- name: Criando Alarme de SCALE UP
+  ec2_metric_alarm:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    state: present
+    region: "{{ region }}"
+    name: "cpu-high"
+    metric: CPUUtilization
+    namespace: "AWS/EC2"
+    statistic: Average
+    comparison: ">="
+    threshold: 80.0
+    period: 300
+    evaluation_periods: 3
+    unit: "Percent"
+    description: "Será acionado quando a média de uso da CPU for superior a 90% por 15 minutos"
+    dimensions:
+      AutoScalingGroupName: "asg-{{ application }}"
+    alarm_actions:
+      - "{{ scale_up_policy.arn }}"
+  tags: alarm
+
+- name: Buscando e Armazenando Informacoes do ASG criado
+  ec2_asg_info:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ region }}"
+    name: "asg-{{ application }}"
+  register: ec2_asg_facts_results
+
+- name: Recuperando instancias que devem ser atachadas ao Target Group
+  ec2_instance_info:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ region }}"
+    filters:
+      instance-state-name: "running"
+      "tag:aws:autoscaling:groupName": "asg-{{ application }}"
+  register: ec2_id
+
+- name: Criando Target Group (HTTP)
+  elb_target_group:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ region }}"
+    name: "tg-{{ application }}-http"
+    protocol: http
+    port: "{{ instance_port_http }}"
+    vpc_id: "{{ vpc_id }}"
+    deregistration_delay_timeout: 10
+    health_check_path: /
+    health_check_port: 8080
+    successful_response_codes: "200"
+    state: present
+
+- name: Adicionando Instancias ao Target Group (HTTP)
+  elb_target:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ region }}"
+    target_group_name: "tg-{{ application }}-http"
+    target_id: "{{ item.instance_id }}"
+    target_status: unused
+    target_port: "{{ instance_port_http }}"
+    state: present
+  with_items: "{{ ec2_id.instances }}"
+  when: ec2_id.instances|length > 0
+
+- name: Provisionando ELB (HTTP)
+  elb_application_lb:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    name: "elb-{{ application }}-http"
+    region: "{{ region }}"
+    subnets: "{{ subnets }}"
+    security_groups: "{{ security_groups }}"
+    scheme: internal
+    listeners:
+      - Protocol: HTTP
+        Port: "{{ load_balance_port_http }}"
+        DefaultActions:
+          - Type: forward
+            TargetGroupName: tg-{{ application }}-http
+    state: present

@@ -1,0 +1,96 @@
+- name: Provisioning Kubernetes 
+  hosts: localhost
+  become: true
+
+  tasks:
+    
+    - name: configure / Update packages
+      apt:
+        name: '*'
+        state: latest
+
+    - name: Updating localtime
+      command: /bin/cp /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
+      tags: timezone
+      become: yes
+
+    - name: Install basic packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+      become: yes 
+      vars:
+        packages:
+        - python3
+        - curl
+        - gcc
+        - make
+        - python3-pip
+        - npm
+        - bash-completion
+        - htop
+        - screen
+        - tree
+        - telnet 
+        - wget 
+        - sudo 
+        - zip
+        - bzip2
+        - nodejs
+        - python3-boto
+        - lvm2
+        - software-properties-common
+        - ca-certificates
+        - apt-transport-https 
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    
+    - name: Add Docker Repository
+        apt_repository:
+          repo: deb https://download.docker.com/linux/ubuntu bionic stable
+          state: present
+    
+    - name: Update apt and install docker-ce
+      apt: update_cache=yes name=docker-ce state=latest
+  
+    - name: Install Docker Module for Python
+      pip:
+        name: docker
+        
+    - name: Add user Ubuntu docker group
+      become: yes
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    - name: apt update
+      become: yes
+      apt: 
+        name: '*'
+        state: latest
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+      become: yes
+
+    - name: Add the webupd8 APT repository
+      apt_repository: repo="deb http://ppa.launchpad.net/webupd8team/java/ubuntu precise main" state=present
+    
+    - name: Automatically select the Oracle License
+      shell: echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
+      changed_when: false
+    
+    - name: Install Oracle Java
+      apt: name={{item}} state=present force=yes
+      with_items:
+      - oracle-java8-installer
+    
+    - name: Set JAVA_HOME
+      shell: sudo echo "export JAVA_HOME=/usr/lib/jvm/java-8-oracle" >> ~/.bashrc    
