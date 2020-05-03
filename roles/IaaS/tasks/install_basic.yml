@@ -2,6 +2,7 @@
   hosts: localhost
   become: true
 
+
   tasks:
     
     - name: configure / Update packages
@@ -41,7 +42,9 @@
         - lvm2
         - software-properties-common
         - ca-certificates
-        - apt-transport-https 
+        - apt-transport-https
+        - openjdk-8-jdk 
+        - openjdk-8-jre
 
     - name: Add Docker GPG apt Key
       apt_key:
@@ -49,16 +52,12 @@
         state: present
     
     - name: Add Docker Repository
-        apt_repository:
-          repo: deb https://download.docker.com/linux/ubuntu bionic stable
-          state: present
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
     
     - name: Update apt and install docker-ce
       apt: update_cache=yes name=docker-ce state=latest
-  
-    - name: Install Docker Module for Python
-      pip:
-        name: docker
         
     - name: Add user Ubuntu docker group
       become: yes
@@ -80,17 +79,15 @@
         enabled: yes
       become: yes
 
-    - name: Add the webupd8 APT repository
-      apt_repository: repo="deb http://ppa.launchpad.net/webupd8team/java/ubuntu precise main" state=present
-    
-    - name: Automatically select the Oracle License
-      shell: echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
-      changed_when: false
-    
-    - name: Install Oracle Java
-      apt: name={{item}} state=present force=yes
-      with_items:
-      - oracle-java8-installer
-    
     - name: Set JAVA_HOME
       shell: sudo echo "export JAVA_HOME=/usr/lib/jvm/java-8-oracle" >> ~/.bashrc    
+
+    - name: Download Metabase .Jar
+      get_url:
+        url: https://downloads.metabase.com/v0.35.3/metabase.jar
+        dest: /tmp/
+        mode: 0644
+
+    - name: Start Service
+      shell: java -jar metabase.jar
+   
