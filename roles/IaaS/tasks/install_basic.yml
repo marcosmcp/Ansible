@@ -88,6 +88,7 @@
         dest: /tmp/
         mode: 0644
 
-    - name: Start Service
-      shell: java -jar metabase.jar
-   
+    - name: Start Metabase
+      shell: java -jar /tmp/metabase.jar > /tmp/metabase.jar.log 2>&1
+    
+    
