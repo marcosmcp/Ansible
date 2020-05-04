@@ -85,11 +85,11 @@
     - name: Download Metabase .Jar
       get_url:
         url: https://downloads.metabase.com/v0.35.3/metabase.jar
-        dest: /tmp/
+        dest: /home/ubuntu/
         mode: 0644
 
     - name: Start Metabase
-      shell: java -jar /tmp/metabase.jar > /tmp/metabase.jar.log 2>&1
+      shell: java -jar /home/ubuntu/metabase.jar > /home/ubuntu/metabase.jar.log 2>&1
     
     - name: Acessando o Metabase
       shell: echo " Acesse o metabase na porta 3000 "
