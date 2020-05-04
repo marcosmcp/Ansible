@@ -1,4 +1,4 @@
-- name: Provisioning Kubernetes 
+- name: Provisioning Desafio 
   hosts: localhost
   become: yes
 
@@ -76,13 +76,11 @@
         name: docker
         state: started
         enabled: yes
-      become: yes
 
     - name: Set JAVA_HOME
       shell: sudo echo "export JAVA_HOME=/usr/lib/jvm/java-8-oracle" >> ~/.bashrc    
 
     - name: Download Metabase .Jars
-      become: yes
       get_url:
         url: https://downloads.metabase.com/v0.35.3/metabase.jar
         dest: /home/ubuntu/workspace/desafio.jar
@@ -90,33 +88,29 @@
 
     - name: Copy Service
       copy:
-      become: yes
-        src: Ansible/roles/IaaS/files/desafio.service
+        src: /tmp/Ansible/roles/IaaS/files/desafio.service
         dest: /etc/systemd/system/desafio.service
         owner: ubuntu
         group: ubuntu
         mode: '0644'
+        remote_src: yes
 
     - name: Copy Script
       copy:
-      become: yes
-        src: Ansible/roles/IaaS/files/desafio.sh
+        src: /tmp/Ansible/roles/IaaS/files/desafio.sh
         dest: /home/ubuntu/workspace/desafio.sh
         owner: ubuntu
         group: ubuntu
-        mode: '0644'
+        mode: a+x
+        remote_src: yes
 
-    - name: Start service
-      service:
-        name: daemon
-        state: reload
-        enabled: yes
-      become: yes
+    - name: Reload deamon
+      shell: sudo systemctl daemon-reload
 
     - name: Start service
       service:
         name: desafio.service
-        state: started
+        state: enabled
         enabled: yes
       become: yes
     
@@ -125,4 +119,9 @@
         name: desafio.service
         state: started
         enabled: yes
-      become: yes
+      
+        - name: Status
+      service:
+        name: desafio.service
+        state: started
+        enabled: yes
