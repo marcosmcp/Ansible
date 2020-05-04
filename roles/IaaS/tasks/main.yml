@@ -131,7 +131,7 @@
     vpc_id: "{{ vpc_id }}"
     deregistration_delay_timeout: 10
     health_check_path: /
-    health_check_port: 8080
+    health_check_port: 3000
     successful_response_codes: "200"
     state: present
 

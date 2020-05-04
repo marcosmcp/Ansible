@@ -1,6 +1,6 @@
 - name: Provisioning Kubernetes 
   hosts: localhost
-  become: true
+  become: yes
 
   tasks:
     
@@ -81,7 +81,8 @@
     - name: Set JAVA_HOME
       shell: sudo echo "export JAVA_HOME=/usr/lib/jvm/java-8-oracle" >> ~/.bashrc    
 
-    - name: Download Metabase .Jar
+    - name: Download Metabase .Jars
+      become: yes
       get_url:
         url: https://downloads.metabase.com/v0.35.3/metabase.jar
         dest: /home/ubuntu/workspace/desafio.jar
