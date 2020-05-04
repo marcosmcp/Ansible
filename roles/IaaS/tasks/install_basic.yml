@@ -77,13 +77,13 @@
       file:
         path: /home/ubuntu/workspace
         state: directory
-        mode: "u=rw,g=wx,o=rwx"
+        mode: '0755'
 
     - name: Download Metabase .Jars
       get_url:
         url: https://downloads.metabase.com/v0.35.3/metabase.jar
         dest: /home/ubuntu/workspace/desafio.jar
-        mode: 'u+x'
+        mode: '0755'
 
     - name: Copy Service
       copy:
@@ -100,7 +100,7 @@
         dest: /home/ubuntu/workspace/desafio.sh
         owner: ubuntu
         group: ubuntu
-        mode: 'u+x'
+        mode: '0755'
         remote_src: yes
 
     - name: Reload deamon
