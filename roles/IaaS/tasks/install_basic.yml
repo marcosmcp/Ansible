@@ -77,20 +77,20 @@
       file:
         path: /home/ubuntu/workspace
         state: directory
-        mode: "u+rwx"
+        mode: "a+rwx"
 
-    - name: Download Metabase .Jars
+    - name: Download Metabase .Jar
       get_url:
         url: https://downloads.metabase.com/v0.35.3/metabase.jar
         dest: /home/ubuntu/workspace/desafio.jar
-        mode: 'u+rwx'
+        mode: 'u+rx'
 
     - name: Permission in desafio.jar
       file:
         path: /home/ubuntu/workspace/desafio.jar
         owner: ubuntu
         group: ubuntu
-        mode: 'u+rwx'
+        mode: 'a+rx'
 
     - name: Copy Service
       copy:
@@ -98,7 +98,7 @@
         dest: /etc/systemd/system/desafio.service
         owner: ubuntu
         group: ubuntu
-        mode: 'u+rwx'
+        mode: 'a+rx'
         remote_src: yes
 
     - name: Copy Script
@@ -107,7 +107,7 @@
         dest: /home/ubuntu/workspace/desafio.sh
         owner: ubuntu
         group: ubuntu
-        mode: 'u+rwx'
+        mode: 'a+rx'
         remote_src: yes
 
     - name: Reload deamon
