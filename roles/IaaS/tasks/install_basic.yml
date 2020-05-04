@@ -12,13 +12,11 @@
     - name: Updating localtime
       command: /bin/cp /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
       tags: timezone
-      become: yes
 
     - name: Install basic packages
       apt:
         name: "{{ packages }}"
         state: present
-      become: yes 
       vars:
         packages:
         - python3
@@ -59,14 +57,12 @@
       apt: update_cache=yes name=docker-ce state=latest
         
     - name: Add user Ubuntu docker group
-      become: yes
       user:
         name: ubuntu
         groups: docker
         append: yes
 
     - name: apt update
-      become: yes
       apt: 
         name: '*'
         state: latest
@@ -78,13 +74,19 @@
         enabled: yes
 
     - name: Set JAVA_HOME
-      shell: sudo echo "export JAVA_HOME=/usr/lib/jvm/java-8-oracle" >> ~/.bashrc    
+      shell: sudo echo "export JAVA_HOME=/usr/lib/jvm/java-8-oracle" >> ~/.bashrc   
+      
+    - name: Criando diretório workspace
+      file:
+        path: /home/ubuntu/workspace
+        state: directory
+        mode: "u=rw,g=wx,o=rwx"
 
     - name: Download Metabase .Jars
       get_url:
         url: https://downloads.metabase.com/v0.35.3/metabase.jar
         dest: /home/ubuntu/workspace/desafio.jar
-        mode: u+x
+        mode: 'u+x'
 
     - name: Copy Service
       copy:
@@ -107,20 +109,7 @@
     - name: Reload deamon
       shell: sudo systemctl daemon-reload
 
-    - name: Start service
-      service:
-        name: desafio.service
-        state: enabled
-        enabled: yes
-      become: yes
-    
     - name: Status
-      service:
-        name: desafio.service
-        state: started
-        enabled: yes
-      
-        - name: Status
       service:
         name: desafio.service
         state: started
