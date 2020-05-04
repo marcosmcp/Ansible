@@ -148,7 +148,7 @@
   with_items: "{{ ec2_id.instances }}"
   when: ec2_id.instances|length > 0
 
-- name: Aguardando Provisionamento de infraestrutura
-  prompt: "Por favor aguarde enquanto é provisionado a infraestrutura"
+- name: Provisionamento de infraestrutura
   pause:
+    prompt: "Por favor aguarde enquanto é provisionado a infraestrutura"
     minutes: 4
