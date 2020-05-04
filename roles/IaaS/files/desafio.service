@@ -7,7 +7,7 @@ User=ubuntu
 WorkingDirectory=/home/ubuntu/workspace
 #path to executable. 
 #executable is a bash script which calls jar file
-ExecStart=/home/ubuntu/workspace/desafio.jar
+ExecStart=/usr/bin/java -jar /home/ubuntu/workspace/desafio.jar
 SuccessExitStatus=143
 TimeoutStopSec=10
 Restart=on-failure
