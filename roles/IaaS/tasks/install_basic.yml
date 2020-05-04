@@ -86,12 +86,11 @@
         mode: 'u+rwx'
 
     - name: Permission in desafio.jar
-      copy:
+      file:
         path: /home/ubuntu/workspace/desafio.jar
         owner: ubuntu
         group: ubuntu
         mode: 'u+rwx'
-        remote_src: yes
 
     - name: Copy Service
       copy:
@@ -112,7 +111,9 @@
         remote_src: yes
 
     - name: Reload deamon
-      shell: sudo systemctl daemon-reload
+      shell: |
+        systemctl daemon-reload
+        systemctl enable desafio.service
 
     - name: Status
       service:
