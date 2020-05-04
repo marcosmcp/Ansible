@@ -84,7 +84,7 @@
       get_url:
         url: https://downloads.metabase.com/v0.35.3/metabase.jar
         dest: /home/ubuntu/workspace/desafio.jar
-        mode: 0644
+        mode: u+a
 
     - name: Copy Service
       copy:
@@ -101,7 +101,7 @@
         dest: /home/ubuntu/workspace/desafio.sh
         owner: ubuntu
         group: ubuntu
-        mode: a+x
+        mode: '0644'
         remote_src: yes
 
     - name: Reload deamon
