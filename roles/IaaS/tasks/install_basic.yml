@@ -2,7 +2,6 @@
   hosts: localhost
   become: true
 
-
   tasks:
     
     - name: configure / Update packages
@@ -85,12 +84,44 @@
     - name: Download Metabase .Jar
       get_url:
         url: https://downloads.metabase.com/v0.35.3/metabase.jar
-        dest: /home/ubuntu/
+        dest: /home/ubuntu/workspace/desafio.jar
         mode: 0644
 
-    - name: Start Metabase
-      shell: java -jar /home/ubuntu/metabase.jar > /home/ubuntu/metabase.jar.log 2>&1
+    - name: Copy Service
+      copy:
+      become: yes
+        src: Ansible/roles/IaaS/files/desafio.service
+        dest: /etc/systemd/system/desafio.service
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Copy Script
+      copy:
+      become: yes
+        src: Ansible/roles/IaaS/files/desafio.sh
+        dest: /home/ubuntu/workspace/desafio.sh
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Start service
+      service:
+        name: daemon
+        state: reload
+        enabled: yes
+      become: yes
+
+    - name: Start service
+      service:
+        name: desafio.service
+        state: started
+        enabled: yes
+      become: yes
     
-    - name: Acessando o Metabase
-      shell: echo " Acesse o metabase na porta 3000 "
-      
+    - name: Status
+      service:
+        name: desafio.service
+        state: started
+        enabled: yes
+      become: yes
