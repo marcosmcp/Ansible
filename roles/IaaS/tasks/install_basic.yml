@@ -21,10 +21,7 @@
         packages:
         - python3
         - curl
-        - gcc
-        - make
         - python3-pip
-        - npm
         - bash-completion
         - htop
         - screen
@@ -33,8 +30,6 @@
         - wget 
         - sudo 
         - zip
-        - bzip2
-        - nodejs
         - python3-boto
         - lvm2
         - software-properties-common
