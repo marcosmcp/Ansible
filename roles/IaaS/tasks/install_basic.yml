@@ -72,9 +72,6 @@
         name: docker
         state: started
         enabled: yes
-
-    - name: Set JAVA_HOME
-      shell: sudo echo "export JAVA_HOME=/usr/lib/jvm/java-8-oracle" >> ~/.bashrc   
       
     - name: Criando diretório workspace
       file:
