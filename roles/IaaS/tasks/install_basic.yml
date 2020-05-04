@@ -91,4 +91,6 @@
     - name: Start Metabase
       shell: java -jar /tmp/metabase.jar > /tmp/metabase.jar.log 2>&1
     
-    
+    - name: Acessando o Metabase
+      shell: echo " Acesse o metabase na porta 3000 "
+      
