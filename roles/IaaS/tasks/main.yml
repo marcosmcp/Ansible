@@ -148,19 +148,3 @@
   with_items: "{{ ec2_id.instances }}"
   when: ec2_id.instances|length > 0
 
-- name: Provisionando ELB (HTTP)
-  elb_application_lb:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
-    name: "elb-{{ application }}-http"
-    region: "{{ region }}"
-    subnets: "{{ subnets }}"
-    security_groups: "{{ security_groups }}"
-    scheme: internal
-    listeners:
-      - Protocol: HTTP
-        Port: "{{ load_balance_port_http }}"
-        DefaultActions:
-          - Type: forward
-            TargetGroupName: tg-{{ application }}-http
-    state: present

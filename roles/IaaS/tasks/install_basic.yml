@@ -103,7 +103,7 @@
         dest: /home/ubuntu/workspace/desafio.sh
         owner: ubuntu
         group: ubuntu
-        mode: '0644'
+        mode: 'u+x'
         remote_src: yes
 
     - name: Reload deamon
