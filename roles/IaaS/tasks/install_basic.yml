@@ -84,7 +84,7 @@
       get_url:
         url: https://downloads.metabase.com/v0.35.3/metabase.jar
         dest: /home/ubuntu/workspace/desafio.jar
-        mode: u+a
+        mode: u+x
 
     - name: Copy Service
       copy:
