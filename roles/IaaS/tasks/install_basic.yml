@@ -85,13 +85,6 @@
         dest: /home/ubuntu/workspace/desafio.jar
         mode: 'u+rx'
 
-    - name: Permission in desafio.jar
-      file:
-        path: /home/ubuntu/workspace/desafio.jar
-        owner: ubuntu
-        group: ubuntu
-        mode: 'a+rx'
-
     - name: Copy Service
       copy:
         src: /tmp/Ansible/roles/IaaS/files/desafio.service
@@ -100,16 +93,7 @@
         group: ubuntu
         mode: 'a+rx'
         remote_src: yes
-
-    - name: Copy Script
-      copy:
-        src: /tmp/Ansible/roles/IaaS/files/desafio.sh
-        dest: /home/ubuntu/workspace/desafio.sh
-        owner: ubuntu
-        group: ubuntu
-        mode: 'a+rx'
-        remote_src: yes
-
+  
     - name: Reload deamon
       shell: |
         systemctl daemon-reload
